@@ -101,40 +101,41 @@ for fd in os.listdir(PROC_FD_DIR):
                 print('File touch: {}'.format(check_output_touch.decode('utf-8')))
 
 # Now export data as CSV for safety (work with a DB list)
-for db in args.export_as_csv:
-    print('=== Work with: {}'.format(db))
-    # Get table list
-    cmd = "echo 'show tables;' | mysql {}".format(db)
-    check_output_table = subprocess.check_output(cmd, shell=True)
-    for table in check_output_table.decode('utf-8').split('\n'):
-        # Skip 'Tables_in_' header
-        if (table[:10] != 'Tables_in_') and (table != ''):
-            # Define files sql, log & err
-            sql_file_path = '{}/export_{}_{}.sql'.format(CSV_PATH, db, table)
-            sql_file_log = '{}/export_{}_{}.log'.format(CSV_PATH, db, table)
-            sql_file_err = '{}/export_{}_{}.err'.format(CSV_PATH, db, table)
-            # Create SQL file
-            target = '{}/{}_{}.txt'.format(CSV_PATH, db, table)
-            # Skip file already exist (mysql fail otherwise)
-            if os.path.isfile(target):
-                print('{} is already exist, i\'ll skip'.format(target))
-            else:
-                # Create sql file to export data as CSV
-                sql_file = open(sql_file_path, 'w')
-                print('File to export SQL data: {}'.format(sql_file_path))
-                cmd = CSV_EXPORT.format(table, target, db)
-                sql_file.write('{}\n'.format(cmd))
-                sql_file.close()
+if args.export_as_csv:
+    for db in args.export_as_csv:
+        print('=== Work with: {}'.format(db))
+        # Get table list
+        cmd = "echo 'show tables;' | mysql {}".format(db)
+        check_output_table = subprocess.check_output(cmd, shell=True)
+        for table in check_output_table.decode('utf-8').split('\n'):
+            # Skip 'Tables_in_' header
+            if (table[:10] != 'Tables_in_') and (table != ''):
+                # Define files sql, log & err
+                sql_file_path = '{}/export_{}_{}.sql'.format(CSV_PATH, db, table)
+                sql_file_log = '{}/export_{}_{}.log'.format(CSV_PATH, db, table)
+                sql_file_err = '{}/export_{}_{}.err'.format(CSV_PATH, db, table)
+                # Create SQL file
+                target = '{}/{}_{}.txt'.format(CSV_PATH, db, table)
+                # Skip file already exist (mysql fail otherwise)
+                if os.path.isfile(target):
+                    print('{} is already exist, i\'ll skip'.format(target))
+                else:
+                    # Create sql file to export data as CSV
+                    sql_file = open(sql_file_path, 'w')
+                    print('File to export SQL data: {}'.format(sql_file_path))
+                    cmd = CSV_EXPORT.format(table, target, db)
+                    sql_file.write('{}\n'.format(cmd))
+                    sql_file.close()
 
-                # Now execute it
-                cmd = 'cat {} | mysql {}'.format(sql_file_path, db)
-                try:
-                    check_output_sqlexec = subprocess.check_output(cmd, shell=True)
-                    # If it's works, save log
-                    print('Mysql log: {}'.format(check_output_sqlexec.decode('utf-8')))
-                    open(sql_file_log, 'w').write(check_output_sqlexec.decode('utf-8'))
-                except subprocess.CalledProcessError as e:
-                    # Catch error and save it
-                    print('Error:')
-                    print(e)
-                    open(sql_file_err, 'w').write(str(e))
+                    # Now execute it
+                    cmd = 'cat {} | mysql {}'.format(sql_file_path, db)
+                    try:
+                        check_output_sqlexec = subprocess.check_output(cmd, shell=True)
+                        # If it's works, save log
+                        print('Mysql log: {}'.format(check_output_sqlexec.decode('utf-8')))
+                        open(sql_file_log, 'w').write(check_output_sqlexec.decode('utf-8'))
+                    except subprocess.CalledProcessError as e:
+                        # Catch error and save it
+                        print('Error:')
+                        print(e)
+                        open(sql_file_err, 'w').write(str(e))
