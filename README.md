@@ -14,7 +14,7 @@ cat employees.sql | sudo mysql
 # Check if it works
 echo 'show databases;' | sudo mysql
 
-# We new a backup for later
+# We need a backup for later
 sudo service mysql stop
 sudo mkdir /backup
 sudo rsync -av /var/lib/mysql/ /backup/
@@ -31,7 +31,7 @@ sudo ls -la /var/lib/mysql/
 echo 'show databases;' | sudo mysql
 ```
 
-## Instructions and why it's can work
+## Instructions and why it can work
 
 - Never stop mysql never, never, never & never
 - Never try a mysqldump when using this tool, never, again
